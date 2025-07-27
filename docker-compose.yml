@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  # React Frontend Service
+  frontend:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+      - REACT_APP_ENV=development
+    depends_on:
+      - api
+    networks:
+      - flavor-town-network
+
+  # Golang API Service
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api:/app
+    environment:
+      - DATABASE_URL=postgresql://flavortown:flavortown@postgres:5432/flavortown?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - ENV=development
+      - PORT=8080
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - flavor-town-network
+
+  # Python Scraper Service
+  scraper:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    volumes:
+      - ./bot:/app
+    environment:
+      - DATABASE_URL=postgresql://flavortown:flavortown@postgres:5432/flavortown?sslmode=disable
+      - ENV=development
+    depends_on:
+      - postgres
+    networks:
+      - flavor-town-network
+    profiles:
+      - scraper
+
+  # Python Data Processor Service
+  processor:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    volumes:
+      - ./bot:/app
+    environment:
+      - DATABASE_URL=postgresql://flavortown:flavortown@postgres:5432/flavortown?sslmode=disable
+      - ENV=development
+    depends_on:
+      - postgres
+    networks:
+      - flavor-town-network
+    profiles:
+      - processor
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=flavortown
+      - POSTGRES_USER=flavortown
+      - POSTGRES_PASSWORD=flavortown
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    networks:
+      - flavor-town-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flavortown"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - flavor-town-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  flavor-town-network:
+    driver: bridge 
