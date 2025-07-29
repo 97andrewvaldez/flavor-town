@@ -30,12 +30,10 @@ services:
       - ./api:/app
     environment:
       - DATABASE_URL=postgresql://flavortown:flavortown@postgres:5432/flavortown?sslmode=disable
-      - REDIS_URL=redis://redis:6379
       - ENV=development
       - PORT=8080
     depends_on:
       - postgres
-      - redis
     networks:
       - flavor-town-network
 
@@ -93,24 +91,8 @@ services:
       timeout: 5s
       retries: 5
 
-  # Redis Cache
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - flavor-town-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
 volumes:
   postgres_data:
-  redis_data:
 
 networks:
   flavor-town-network:

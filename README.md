@@ -22,37 +22,58 @@ Python Services → Database ← Golang API ← React Frontend
 
 ### Services
 - **React Frontend:** Vite + Chakra UI with theme system
-- **Golang API:** High-performance REST API (read-only)
+- **Golang API:** REST API (read-only)
 - **Python Scraper:** Automated data collection (write-only)
 - **Python Data Processor:** Data transformation and analytics (write-only)
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker and Docker Compose
+- Docker and Docker Compose (for containerized development)
+  or
 - Node.js 18+ (for local development)
 - Go 1.21+ (for local development)
 - Python 3.11+ (for local development)
+- PostgreSQL 14+ (for local development)
 
-### Local Development
+### Development Options
 
-1. **Clone and setup:**
-   ```bash
-   git clone <your-repo>
-   cd flavor-town
-   ```
+#### Option 1: Docker Development (Recommended)
+```bash
 
-2. **Start all services:**
-   ```bash
-   docker-compose up
-   ```
+# Start all services
+docker-compose up
+```
 
-3. **Access the application:**
-   - Frontend: http://localhost:3000
-   - API: http://localhost:8080
-   - Database: localhost:5432
+#### Option 2: Local Development (without Docker)
+For developers who can't use Docker or prefer native development:
+
+```bash
+# Quick start with Makefile
+make install
+make setup
+make start
+```
+
+**📖 Full Local Development Guide:** [docs/local-development.md](docs/local-development.md)
+
+### Access Your Application
+- **Frontend:** http://localhost:3000
+- **API:** http://localhost:8080
+- **Database:** localhost:5432
 
 ### Individual Service Development
+
+**Using Makefile (Recommended):**
+```bash
+# Start individual services
+make start-api    # API only
+make start-ui     # Frontend only
+make scraper      # Python scraper
+make processor    # Python data processor
+```
+
+**Manual Commands:**
 
 **Frontend (React):**
 ```bash
@@ -81,27 +102,6 @@ cd bot
 python processor/main.py
 ```
 
-## 🛠️ Technology Stack
-
-### Frontend
-- **React 18+** with TypeScript
-- **Vite** for build tooling
-- **Chakra UI** with custom theme system
-- **Framer Motion** for animations
-- **React Router** for navigation
-
-### Backend
-- **Golang 1.21+** for API service
-- **Python 3.11+** for scraping and data processing
-- **PostgreSQL** for primary database
-- **Redis** for caching
-
-### Infrastructure
-- **Docker** for containerization
-- **Docker Compose** for local development
-- **GitHub Actions** for CI/CD
-- **GCP/Render** for deployment
-
 ## 📁 Project Structure
 
 ```
@@ -128,14 +128,40 @@ flavor-town/
 - **Loading Animations:** Ice cream themed loading states
 - **Theme Switching:** Smooth color transitions
 
-## 🚀 Deployment
+## 🛠️ Development Tools
 
-### Local Development
+### Makefile Commands
+The project includes a comprehensive Makefile for local development:
+
 ```bash
-docker-compose up
+# Setup and installation
+make install      # Install all dependencies
+make setup        # Setup database and environment files
+
+# Start services
+make start        # Start all services
+make start-api    # Start API only
+make start-ui     # Start frontend only
+make scraper      # Start Python scraper
+make processor    # Start Python data processor
+
+# Development utilities
+make status       # Check service status
+make test         # Run all tests
+make stop         # Stop all services
+make clean        # Clean up temporary files
+make logs         # Show service logs
+
+# Database helpers
+make db-reset     # Reset database
+make db-seed      # Seed database with data
 ```
 
-### Production Options 
+**📖 Full Makefile Documentation:** See [docs/local-development.md](docs/local-development.md) for detailed usage.
+
+## 🚀 Deployment
+
+### Production Options - TBD
 - **GCP:** Cloud Run + Cloud SQL + Memorystore
 - **Render:** Full-stack platform with managed services
 - **Vercel + Railway:** Hybrid approach
@@ -154,4 +180,4 @@ This project is for portfolio demonstration purposes.
 
 ---
 
-**Built with ❤️ and lots of 🍦 for the ice cream community** 
+**Built with ❤️ and lots of 🍦** 

@@ -34,14 +34,10 @@ Flavor Town is designed as a **microservices portfolio showcase** demonstrating 
                         │   PostgreSQL    │    │  Python Data    │
                         │   (Read/Write)  │◄───│   Processor     │
                         └─────────────────┘    │   (Write Only)  │
-                                │              └─────────────────┘
-                                │
-                                ▼
-                        ┌─────────────────┐
-                        │   Redis Cache   │
-                        │   (Performance) │
-                        └─────────────────┘
+                                               └─────────────────┘
 ```
+
+*Note: Redis caching may be added in future phases for performance optimization.*
 ```
 
 ### 1.3 Technology Stack
@@ -57,7 +53,7 @@ Flavor Town is designed as a **microservices portfolio showcase** demonstrating 
 - Golang 1.21+ for API service
 - Python 3.11+ for scraping and data processing
 - PostgreSQL for primary database
-- Redis for caching and session management
+- Redis for caching and session management *(future phase)*
 
 **Infrastructure:**
 - Docker for containerization
@@ -197,16 +193,18 @@ Python Services → Database ← Golang API ← React Frontend
 
 #### 2.3.1 Shared Dependencies
 - **PostgreSQL:** Primary database (Python services write, Golang API reads)
-- **Redis:** Caching and session management
 - **Environment Variables:** Configuration and secrets
 - **Docker Network:** Inter-service communication
+
+#### 2.3.2 Future Dependencies (Phase 2)
+- **Redis:** Caching and session management
 
 #### 2.3.2 Service-Specific Database Access
 - **Python Services:** Full read/write access to database
 - **Golang API:** Read-only access to database (no write operations)
 - **React Frontend:** No direct database access (only via API)
 
-#### 2.3.2 Service-Specific Dependencies
+#### 2.3.3 Service-Specific Dependencies
 - **Frontend:** Chakra UI, Framer Motion, React Router
 - **Golang API:** Gin, GORM, JWT
 - **Python Services:** SQLAlchemy, BeautifulSoup, APScheduler
@@ -612,10 +610,8 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
-      - redis
     environment:
       - DATABASE_URL=postgresql://user:pass@postgres:5432/flavortown
-      - REDIS_URL=redis://redis:6379
 
   scraper:
     build: ./scraper
@@ -642,17 +638,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-
 volumes:
   postgres_data:
-  redis_data:
 ```
+
+*Note: Redis service will be added in future phases for caching optimization.*
 
 #### 6.1.2 Development Commands
 ```bash
@@ -686,18 +676,18 @@ docker-compose exec api go test ./...
 **Option A: GCP (Recommended for Portfolio)**
 - **Cloud Run:** Serverless container deployment
 - **Cloud SQL:** Managed PostgreSQL database
-- **Memorystore:** Managed Redis
 - **Cloud CDN:** CDN for static assets
 - **Cloud DNS:** DNS management
 - **Cloud Build:** CI/CD pipeline integration
+- **Memorystore:** Managed Redis *(future phase)*
 
 **Option B: Render (Simpler Alternative)**
 - **Render:** Full-stack deployment platform
 - **PostgreSQL:** Managed database service
-- **Redis:** Managed Redis service
 - **Static Sites:** Frontend deployment
 - **Background Services:** Python services
 - **Web Services:** Golang API service
+- **Redis:** Managed Redis service *(future phase)*
 
 **Option C: Vercel + Railway**
 - **Vercel:** Frontend deployment
@@ -814,8 +804,8 @@ jobs:
 #### 8.2.1 API Optimization
 - **Database Indexing:** Proper database indexes
 - **Query Optimization:** Efficient database queries
-- **Caching:** Redis caching for frequently accessed data
 - **Connection Pooling:** Database connection pooling
+- **Caching:** Redis caching for frequently accessed data *(future phase)*
 
 #### 8.2.2 Scaling Considerations
 - **Horizontal Scaling:** Multiple API instances
