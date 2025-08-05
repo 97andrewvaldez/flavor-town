@@ -1,13 +1,13 @@
 # Flavor Town 🍦
 
-A beautiful, portfolio-worthy web application that aggregates ice cream flavors of the day from various Wisconsin ice cream shops. 
+A fun web application that aggregates ice cream flavors of the day from various Wisconsin & Colorado ice cream shops. 
 
 ## 🎯 Project Overview
 
 **Flavor Town** serves as a web application for Ice Cream enthusiasts to find different flavors of the day in regards to their location
 
 ### Key Features
-- **Time-Based Views:** Smooth month/week/daily view transitions with animations
+- **Time-Based Views:** Smooth month/week/daily views
 - **Location-Based Discovery:** Find ice cream shops near you
 - **Beautiful UI/UX:** Three themes (Light/Dark/Fun) with smooth animations
 - **Microservices Architecture:** Four loosely coupled services
