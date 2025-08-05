@@ -8,8 +8,9 @@ help:
 	@echo "🍦 Flavor Town Local Development Commands"
 	@echo ""
 	@echo "Setup Commands:"
-	@echo "  make install    - Install all dependencies"
-	@echo "  make setup      - Setup database and environment"
+	@echo "  make install       - Install all dependencies"
+	@echo "  make install-python - Install only Python dependencies (for troubleshooting)"
+	@echo "  make setup         - Setup database and environment"
 	@echo ""
 	@echo "Development Commands:"
 	@echo "  make start      - Start all services (API + Frontend)"
@@ -32,22 +33,25 @@ install:
 	cd api && go mod tidy
 	@echo "Installing Python dependencies..."
 	cd bot && python -m venv venv
-	cd bot && source venv/bin/activate && pip install -r requirements.txt
+	cd bot && source venv/bin/activate && pip install --upgrade pip setuptools wheel
+	cd bot && source venv/bin/activate && CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" pip install -r requirements.txt
 	@echo "✅ All dependencies installed!"
 
 # Setup database and environment
 setup:
 	@echo "🗄️ Setting up database..."
-	@echo "Please ensure PostgreSQL is running first!"
+	@echo "Please ensure PostgreSQL is running and psql is in your PATH!"
+	@echo "Creating database and user (you'll be prompted for postgres password)..."
+	psql -h 127.0.0.1 -U postgres -c "CREATE USER flavortown WITH PASSWORD 'flavortown';" || echo "User flavortown already exists"
+	psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE flavortown OWNER flavortown;" || echo "Database flavortown already exists"
 	@echo "Creating database schema..."
-	psql -h localhost -U flavortown -d flavortown -f db/init/01_create_schema.sql
+	psql -h 127.0.0.1 -U flavortown -d flavortown -f db/init/01_create_schema.sql
 	@echo "Seeding database..."
-	psql -h localhost -U flavortown -d flavortown -f db/init/02_seed_data.sql
+	psql -h 127.0.0.1 -U flavortown -d flavortown -f db/init/02_seed_data.sql
 	@echo "Creating environment files..."
 	@echo "VITE_API_URL=http://localhost:8080" > ui/.env
 	@echo "VITE_ENV=development" >> ui/.env
-	@echo "DATABASE_URL=postgresql://flavortown:flavortown@localhost:5432/flavortown?sslmode=disable" > api/.env
-	@echo "# REDIS_URL=redis://localhost:6379" >> api/.env
+	@echo "DATABASE_URL=postgresql://flavortown:flavortown@127.0.0.1:5432/flavortown?sslmode=disable" > api/.env
 	@echo "ENV=development" >> api/.env
 	@echo "PORT=8080" >> api/.env
 	@echo "DATABASE_URL=postgresql://flavortown:flavortown@localhost:5432/flavortown?sslmode=disable" > bot/.env
@@ -58,7 +62,7 @@ setup:
 start:
 	@echo "🚀 Starting Flavor Town services..."
 	@echo "Starting API server..."
-	cd api && go run main.go &
+	cd api && go run . &
 	@sleep 3
 	@echo "Starting Frontend..."
 	cd ui && npm run dev &
@@ -71,7 +75,7 @@ start:
 # Start only API
 start-api:
 	@echo "🚀 Starting API server..."
-	cd api && go run main.go
+	cd api && go run .
 
 # Start only frontend
 start-ui:
@@ -81,7 +85,7 @@ start-ui:
 # Stop all services
 stop:
 	@echo "🛑 Stopping services..."
-	@pkill -f "go run main.go" || true
+	@pkill -f "go run" || true
 	@pkill -f "npm run dev" || true
 	@pkill -f "vite" || true
 	@echo "✅ Services stopped!"
@@ -114,18 +118,26 @@ clean:
 logs:
 	@echo "📋 Service Logs:"
 	@echo "API logs:"
-	@ps aux | grep "go run main.go" | grep -v grep || echo "API not running"
+	@ps aux | grep "go run" | grep -v grep || echo "API not running"
 	@echo "Frontend logs:"
 	@ps aux | grep "npm run dev" | grep -v grep || echo "Frontend not running"
 
 # Development helpers
 dev-api:
 	@echo "🔄 Starting API in development mode..."
-	cd api && go run main.go
+	cd api && go run .
 
 dev-ui:
 	@echo "🔄 Starting Frontend in development mode..."
 	cd ui && npm run dev
+
+# Python dependency installation (for troubleshooting)
+install-python:
+	@echo "🐍 Installing Python dependencies..."
+	cd bot && python -m venv venv
+	cd bot && source venv/bin/activate && pip install --upgrade pip setuptools wheel
+	cd bot && source venv/bin/activate && CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" pip install -r requirements.txt
+	@echo "✅ Python dependencies installed!"
 
 # Database helpers
 db-reset:
@@ -139,6 +151,14 @@ db-seed:
 	@echo "🌱 Seeding database..."
 	psql -h localhost -U flavortown -d flavortown -f db/init/02_seed_data.sql
 	@echo "✅ Database seeded!"
+
+# Database setup (creates user and database)
+db-setup:
+	@echo "🗄️ Setting up database and user..."
+	@echo "You'll be prompted for the postgres superuser password..."
+	psql -h localhost -U postgres -c "CREATE USER flavortown WITH PASSWORD 'flavortown';" || echo "User flavortown already exists"
+	psql -h localhost -U postgres -c "CREATE DATABASE flavortown OWNER flavortown;" || echo "Database flavortown already exists"
+	@echo "✅ Database setup complete!"
 
 # Python service helpers
 scraper:

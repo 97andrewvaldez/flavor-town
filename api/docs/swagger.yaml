@@ -1,0 +1,41 @@
+basePath: /api/v1
+host: localhost:8080
+info:
+  contact: {}
+  description: A simple API for Flavor Town ice cream application
+  title: Flavor Town API
+  version: "1.0"
+paths:
+  /api/v1/health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the API is healthy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /api/v1/test:
+    get:
+      consumes:
+      - application/json
+      description: A simple test endpoint to verify the API is working
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Test endpoint
+      tags:
+      - test
+swagger: "2.0"
